@@ -14,3 +14,10 @@ after_success:
   - docker build -t plato28/multi-nginx ./nginx
   - docker build -t plato28/multi-server ./server
   - docker build -t plato28/multi-worker ./worker
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  - docker push plato28/multi-client
+  - docker push plato28/multi-nginx
+  - docker push plato28/multi-server
+  - docker push plato28/multi-worker
