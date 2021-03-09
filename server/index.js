@@ -45,31 +45,43 @@ app.get('/', (req, res) => {
 });
 
 app.get('/values/all', async (req, res) => {
-	const values = await pgClient.query('SELECT * FROM values');
+	try {
+		const values = await pgClient.query('SELECT * FROM values');
 
-	res.send(values.rows);
+		res.send(values.rows);
+	} catch (err) {
+		console.log(err);
+	}
 });
 
 app.get('/values/current', async (req, res) => {
-	redisClient.hgetall('values', (err, values) => {
-		res.send(values);
-	});
+	try {
+		redisClient.hgetall('values', (err, values) => {
+			res.send(values);
+		});
+	} catch (err) {
+		console.log(err);
+	}
 });
 
 app.post('/values', async (req, res) => {
-	const index = req.body.index;
+	try {
+		const index = req.body.index;
 
-	if (parseInt(index) > 30) {
-		res.status(422).send('Index too high');
+		if (parseInt(index) > 30) {
+			res.status(422).send('Index too high');
+		}
+
+		redisClient.hset('values', index, 'Nothing yet!');
+
+		pub.publish('insert', index);
+
+		pgClient.query('INSERT INTO values(NUMBER) VALUES($1)', [index]);
+
+		res.send({ working: true });
+	} catch (err) {
+		console.log(err);
 	}
-
-	redisClient.hset('values', index, 'Nothing yet!');
-
-	pub.publish('insert', index);
-
-	pgClient.query('INSERT INTO values(NUMBER) VALUES($1)', [index]);
-
-	res.send({ working: true });
 });
 
 app.listen(5000, (req, res) => {
