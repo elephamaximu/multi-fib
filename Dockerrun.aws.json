@@ -1,0 +1,29 @@
+{
+	"AWSEBDockerrunVersion": 2,
+	"containerDefinitions": [
+		{
+			"name": "client",
+			"image": "plato28/multi-client",
+			"hostname": "client",
+			"essential": false
+		},
+		{
+			"name": "server",
+			"image": "plato28/multi-server",
+			"hostname": "api",
+			"essential": false
+		},
+		{
+			"name": "worker",
+			"image": "plato28/multi-worker",
+			"essential": false
+		},
+		{
+			"name": "nginx",
+			"image": "plato28/multi-nginx",
+			"essential": true,
+			"portMappings": [{ "hostPort": 80, "containerPort": 80 }],
+			"links": ["client", "server"]
+		}
+	]
+}
